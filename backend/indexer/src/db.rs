@@ -329,7 +329,7 @@ pub async fn get_events_for_project(
     let rows = sqlx::query_as::<_, EventRecord>(
         r#"
         SELECT id, event_type, project_id, actor, amount, ledger, timestamp,
-               contract_id, tx_hash, created_at
+               contract_id, tx_hash, extra_data, created_at
         FROM   events
         WHERE  project_id = ?1
         ORDER  BY ledger ASC, id ASC
