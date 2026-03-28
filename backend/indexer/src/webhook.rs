@@ -284,6 +284,7 @@ mod tests {
                 project_id: Some("42".to_string()),
                 actor: Some("GABC".to_string()),
                 amount: Some("1000".to_string()),
+                extra_data: None,
                 ledger: 1,
                 timestamp: 1,
                 contract_id: "CID".to_string(),
