@@ -1,12 +1,9 @@
-#![cfg(test)]
-
-use crate::test_utils::{create_token, setup_test};
-use crate::{Error, ProjectStatus, Role};
-use soroban_sdk::{testutils::{Address as _, Ledger}, Address, Bytes, Vec};
-
-fn dummy_metadata(env: &soroban_sdk::Env) -> Bytes {
-    Bytes::from_slice(env, b"bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-}
+use crate::test_utils::{create_token, dummy_metadata_uri, dummy_proof, setup_test};
+use crate::Role;
+use soroban_sdk::{
+    testutils::{Address as _, Ledger},
+    Address, Vec,
+};
 
 #[test]
 fn test_extend_deadline_success() {
@@ -15,6 +12,7 @@ fn test_extend_deadline_success() {
     let token = create_token(&env, &admin);
     let accepted_tokens = Vec::from_array(&env, [token.address.clone()]);
 
+    // Register project manager
     client.grant_role(&admin, &creator, &Role::ProjectManager);
 
     let now = 1000;
@@ -25,11 +23,10 @@ fn test_extend_deadline_success() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &deadline,
         &false,
-        &0u32,
     );
 
     let new_deadline = deadline + 5000;
@@ -56,11 +53,10 @@ fn test_extend_deadline_by_admin() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &deadline,
         &false,
-        &0u32,
     );
 
     let new_deadline = deadline + 5000;
@@ -85,11 +81,10 @@ fn test_extend_deadline_unauthorized() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &false,
-        &0u32,
     );
 
     client.extend_deadline(&stranger, &project.id, &(env.ledger().timestamp() + 15000));
@@ -110,13 +105,13 @@ fn test_extend_deadline_backwards() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &deadline,
         &false,
-        &0u32,
     );
 
+    // New deadline same as or earlier than current is Error::InvalidDeadline (13)
     client.extend_deadline(&creator, &project.id, &deadline);
 }
 
@@ -138,14 +133,15 @@ fn test_extend_deadline_expired() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &deadline,
         &false,
-        &0u32,
     );
 
+    // Fast forward past deadline
     env.ledger().set_timestamp(deadline + 1);
+
     client.extend_deadline(&creator, &project.id, &(deadline + 5000));
 }
 
@@ -167,13 +163,13 @@ fn test_extend_deadline_too_long() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &deadline,
         &false,
-        &0u32,
     );
 
+    // 1 year + 1 second
     let too_late = now + 31_536_000 + 1;
     client.extend_deadline(&creator, &project.id, &too_late);
 }

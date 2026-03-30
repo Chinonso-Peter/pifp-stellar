@@ -1,6 +1,6 @@
 extern crate std;
 
-use soroban_sdk::{vec, Bytes};
+use soroban_sdk::vec;
 
 use crate::test_utils::TestContext;
 
@@ -56,7 +56,6 @@ fn test_get_project_balances() {
         &metadata_uri,
         &(ctx.env.ledger().timestamp() + 86400),
         &false,
-        &0u32,
     );
 
     let donator = ctx.generate_address();

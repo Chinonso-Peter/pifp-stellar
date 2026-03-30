@@ -1,12 +1,6 @@
-#![cfg(test)]
-
-use crate::test_utils::{create_token, setup_test};
-use crate::{Error, ProjectStatus, Role};
-use soroban_sdk::{testutils::{Address as _, Ledger}, Address, Bytes, Vec};
-
-fn dummy_metadata(env: &soroban_sdk::Env) -> Bytes {
-    Bytes::from_slice(env, b"bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
-}
+use crate::test_utils::{create_token, dummy_metadata_uri, dummy_proof, setup_test};
+use crate::Role;
+use soroban_sdk::{testutils::Address as _, token, Address, Vec};
 
 #[test]
 fn test_whitelist_funding_restricted() {
@@ -14,6 +8,7 @@ fn test_whitelist_funding_restricted() {
     let creator = Address::generate(&env);
     let donor = Address::generate(&env);
     let token = create_token(&env, &admin);
+    let token_sac = token::StellarAssetClient::new(&env, &token.address);
     let accepted_tokens = Vec::from_array(&env, [token.address.clone()]);
 
     client.grant_role(&admin, &creator, &Role::ProjectManager);
@@ -23,15 +18,15 @@ fn test_whitelist_funding_restricted() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &true, // is_private
         &0u32,
     );
 
     // Attempt deposit from non-whitelisted donor
-    token.mint(&donor, &500);
+    token_sac.mint(&donor, &500);
     let result = client.try_deposit(&project.id, &donor, &token.address, &500);
 
     assert!(result.is_err());
@@ -44,6 +39,7 @@ fn test_whitelist_funding_allowed() {
     let creator = Address::generate(&env);
     let donor = Address::generate(&env);
     let token = create_token(&env, &admin);
+    let token_sac = token::StellarAssetClient::new(&env, &token.address);
     let accepted_tokens = Vec::from_array(&env, [token.address.clone()]);
 
     client.grant_role(&admin, &creator, &Role::ProjectManager);
@@ -52,8 +48,8 @@ fn test_whitelist_funding_allowed() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &true,
         &0u32,
@@ -63,7 +59,7 @@ fn test_whitelist_funding_allowed() {
     client.add_to_whitelist(&creator, &project.id, &donor);
 
     // Deposit should now work
-    token.mint(&donor, &500);
+    token_sac.mint(&donor, &500);
     client.deposit(&project.id, &donor, &token.address, &500);
 
     let balance = client.get_balance(&project.id, &token.address);
@@ -85,8 +81,8 @@ fn test_whitelist_management_auth() {
         &creator,
         &accepted_tokens,
         &1000,
-        &[0u8; 32].into(),
-        &dummy_metadata(&env),
+        &dummy_proof(&env),
+        &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &true,
         &0u32,

@@ -7,6 +7,29 @@ use soroban_sdk::{
 
 use crate::{types::Project, PifpProtocol, PifpProtocolClient, Role};
 
+pub fn setup_test() -> (Env, PifpProtocolClient<'static>, Address) {
+    let ctx = TestContext::new();
+    let env = ctx.env.clone();
+    let client = PifpProtocolClient::new(&env, &ctx.client.address);
+    (env, client, ctx.admin)
+}
+
+pub fn create_token<'a>(env: &Env, admin: &Address) -> token::Client<'a> {
+    let addr = env.register_stellar_asset_contract_v2(admin.clone());
+    token::Client::new(env, &addr.address())
+}
+
+pub fn dummy_metadata_uri(env: &Env) -> Bytes {
+    Bytes::from_slice(
+        env,
+        b"bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+    )
+}
+
+pub fn dummy_proof(env: &Env) -> BytesN<32> {
+    BytesN::from_array(env, &[0xabu8; 32])
+}
+
 pub struct TestContext {
     pub env: Env,
     pub client: PifpProtocolClient<'static>,
@@ -81,13 +104,15 @@ impl TestContext {
             &proof_hash,
             &metadata_uri,
             &deadline,
-            &false,
-            &0u32,
+            &is_private,
         )
     }
 
     pub fn dummy_metadata_uri(&self) -> Bytes {
-        Bytes::from_slice(&self.env, b"bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi")
+        Bytes::from_slice(
+            &self.env,
+            b"bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi",
+        )
     }
 
     pub fn dummy_proof(&self) -> BytesN<32> {

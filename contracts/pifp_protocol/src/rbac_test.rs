@@ -1,7 +1,7 @@
 extern crate std;
 
 use crate::{test_utils::TestContext, Role};
-use soroban_sdk::{vec, Bytes};
+use soroban_sdk::vec;
 
 #[test]
 fn test_init_sets_super_admin() {
@@ -83,7 +83,6 @@ fn test_project_manager_can_register() {
         &metadata_uri,
         &(ctx.env.ledger().timestamp() + 86400),
         &false,
-        &0u32,
     );
     assert_eq!(project.creator, ctx.manager);
 }
