@@ -3,6 +3,7 @@ mod config;
 mod errors;
 mod health;
 mod metrics;
+mod notifications;
 mod verifier;
 
 use std::sync::Arc;
@@ -100,7 +101,6 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     let metrics = Arc::new(OracleMetrics::new());
-
     if cli.serve {
         health::serve(config.metrics_port).await?;
         return Ok(());
@@ -209,6 +209,11 @@ async fn process_batch(
     }
 }
 
+/// Process a single proof: fetch from IPFS, hash, optionally submit on-chain.
+///
+/// On any verification failure the Slack alert fires as a best-effort
+/// side-effect (3-second timeout, result discarded) before the original
+/// error is returned unchanged.
 async fn process_single_proof(
     task: ProofTask,
     config: Arc<Config>,
@@ -219,8 +224,9 @@ async fn process_single_proof(
     metrics.verifications_total.inc();
 
     info!(
-        "project={} cid={} status=fetching",
-        project_id, task.proof_cid
+        project_id = project_id,
+        cid = %task.proof_cid,
+        "fetching proof"
     );
 
     let proof_hash = {
@@ -236,16 +242,16 @@ async fn process_single_proof(
     };
 
     info!(
-        "project={} hash={} status=hashed",
-        project_id,
-        hex::encode(proof_hash)
+        project_id = project_id,
+        hash = %hex::encode(proof_hash),
+        "proof hashed"
     );
 
     if dry_run {
         warn!(
-            "project={} status=dry_run would submit verify_and_release with hash={}",
-            project_id,
-            hex::encode(proof_hash)
+            project_id = project_id,
+            hash = %hex::encode(proof_hash),
+            "dry_run — skipping chain submission"
         );
         return Ok((project_id, None));
     }

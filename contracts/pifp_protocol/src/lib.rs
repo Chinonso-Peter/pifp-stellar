@@ -530,6 +530,7 @@ impl PifpProtocol {
     }
 
 
+
     /// Deposit into multiple projects atomically in a single transaction.
     ///
     /// `deposits` is a list of `DepositRequest` entries, each specifying a
