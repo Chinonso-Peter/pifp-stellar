@@ -11,10 +11,15 @@ mod db;
 mod errors;
 mod events;
 mod indexer;
+mod middleware;
+mod profiles;
 mod metrics;
 mod profiles;
 mod rpc;
 mod webhook;
+
+#[cfg(test)]
+mod auth_test;
 
 use std::sync::Arc;
 
