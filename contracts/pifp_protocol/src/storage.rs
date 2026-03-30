@@ -156,6 +156,7 @@ pub fn save_project(env: &Env, project: &Project) {
         deadline: project.deadline,
         is_private: project.is_private,
         metadata_uri: project.metadata_uri.clone(),
+        categories: project.categories,
     };
 
     let state = ProjectState {
@@ -299,6 +300,7 @@ pub fn load_project(env: &Env, id: u64) -> Project {
         is_private: config.is_private,
         paused: state.paused,
         refund_expiry: state.refund_expiry,
+        categories: config.categories,
     }
 }
 
@@ -333,6 +335,7 @@ pub fn maybe_load_project(env: &Env, id: u64) -> Option<Project> {
         is_private: config.is_private,
         paused: state.paused,
         refund_expiry: state.refund_expiry,
+        categories: config.categories,
     })
 }
 

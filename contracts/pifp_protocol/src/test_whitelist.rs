@@ -22,6 +22,7 @@ fn test_whitelist_funding_restricted() {
         &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &true, // is_private
+        &0u32,
     );
 
     // Attempt deposit from non-whitelisted donor
@@ -51,6 +52,7 @@ fn test_whitelist_funding_allowed() {
         &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &true,
+        &0u32,
     );
 
     // Add donor to whitelist
@@ -83,6 +85,7 @@ fn test_whitelist_management_auth() {
         &dummy_metadata_uri(&env),
         &(env.ledger().timestamp() + 10000),
         &true,
+        &0u32,
     );
 
     // Stranger cannot add to whitelist

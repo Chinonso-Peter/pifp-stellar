@@ -60,7 +60,6 @@ fn test_extend_deadline_by_admin() {
     );
 
     let new_deadline = deadline + 5000;
-    // Admin can also extend
     client.extend_deadline(&admin, &project.id, &new_deadline);
 
     let updated_project = client.get_project(&project.id);

@@ -41,6 +41,7 @@ pub mod errors;
 pub mod events;
 pub mod invariants_checker;
 pub mod rbac;
+pub mod categories;
 mod storage;
 mod types;
 
@@ -189,6 +190,7 @@ impl PifpProtocol {
         metadata_uri: Bytes,
         deadline: u64,
         is_private: bool,
+        categories: u32,
     ) -> Project {
         Self::require_not_paused(&env);
         creator.require_auth();
@@ -241,6 +243,7 @@ impl PifpProtocol {
             is_private,
             paused: false,
             refund_expiry: 0,
+            categories,
         };
 
         save_project(&env, &project);
