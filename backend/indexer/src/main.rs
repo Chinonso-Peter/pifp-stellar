@@ -159,6 +159,9 @@ async fn main() -> anyhow::Result<()> {
             "/profiles/:address",
             axum::routing::delete(api::delete_profile),
         )
+        .layer(rate_limit::RateLimitLayer::in_memory(
+            rate_limit::DEFAULT_REQUESTS_PER_MINUTE,
+        ))
         .layer(CorsLayer::permissive())
         .layer(TraceLayer::new_for_http())
         .with_state(api_state);
