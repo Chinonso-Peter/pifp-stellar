@@ -676,7 +676,7 @@ pub async fn get_project_donors(
           AND event_type = 'project_funded'
           AND actor IS NOT NULL
         GROUP BY actor
-        ORDER BY total_donated DESC, first_donation_timestamp ASC
+        ORDER BY total_donated DESC, first_donation_timestamp ASC, address ASC
         LIMIT ?2 OFFSET ?3
         "#,
     )
