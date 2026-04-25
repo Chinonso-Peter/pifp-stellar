@@ -18,6 +18,7 @@ pub(crate) mod ml_pipeline;
 pub(crate) mod profiles;
 pub(crate) mod rate_limit;
 pub(crate) mod rpc;
+pub(crate) mod btree_storage;
 pub(crate) mod webhook;
 
 #[cfg(test)]
